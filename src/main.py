@@ -4,17 +4,13 @@ from torch.optim import Optimizer
 from torchvision.datasets import FashionMNIST
 from torchvision.transforms import ToTensor
 
-import torch
-import network 
-import json
-import timeit
+import torch, network, json, timeit
 
 with open("src/config.json") as file:
     config = json.load(file)
 
-epochs = config["epochs"]
-learning_rate = config["learning_rate"]
 batch_size = config["batch_size"]
+output_path = config["output_path"]
 
 def train_loop(dataloader: DataLoader, model: Module, loss_fn: CrossEntropyLoss, optimizer: Optimizer, device: str):
     size = len(dataloader.dataset)
@@ -63,24 +59,32 @@ def main():
 
     # Initialize model, optimizer and loss function
     model = network.Neural_Network().to(device)
-    optimizer = torch.optim.SGD(params = model.parameters(), lr = learning_rate)
+    optimizer = torch.optim.SGD(params = model.parameters(), lr = config["learning_rate"])
     loss_fn = CrossEntropyLoss()
 
-    for t in range(epochs):
-        print(f"Epoch {t+1}\n-----------------")
-        train_loop(
-            data_loader_train,
-            model,
-            loss_fn,
-            optimizer,
-            device
-        )
-        test_loop(
-            data_loader_test,
-            model,
-            loss_fn,
-            device
-        )
+    if config["training"]:
+        for t in range(config["epochs"]):
+            print(f"Epoch {t+1}\n-----------------")
+            train_loop(
+                data_loader_train,
+                model,
+                loss_fn,
+                optimizer,
+                device
+            )
+            test_loop(
+                data_loader_test,
+                model,
+                loss_fn,
+                device
+            )
+
+        if config["save_full_model"]:
+            torch.save(model, output_path)
+            print(f"Model saved to {output_path}")
+        else:
+            torch.save(model.state_dict, output_path)
+            print(f"Model weigths saved to {output_path}")
 
 if __name__ == "__main__":
     start = timeit.default_timer()

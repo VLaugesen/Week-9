@@ -1,5 +1,8 @@
 {
     "epochs" : 5,
     "learning_rate" : 1e-3,
-    "batch_size" : 64
+    "batch_size" : 64,
+    "training" : true,
+    "save_full_model" : false,
+    "output_path" : "src/model.pt"
 }
